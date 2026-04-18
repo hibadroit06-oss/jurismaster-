@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#534AB7">
+<title>JurisMaster 80/20</title>
+<link rel="manifest" href="manifest.json">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --purple:#534AB7;--purple-light:#EEEDFE;--purple-dark:#3C3489;
+  --teal:#1D9E75;--teal-light:#E1F5EE;--teal-dark:#085041;
+  --coral:#D85A30;--coral-light:#FAECE7;--coral-dark:#712B13;
+  --amber:#BA7517;--amber-light:#FAEEDA;--amber-dark:#633806;
+  --blue:#185FA5;--blue-light:#E6F1FB;--blue-dark:#0C447C;
+  --green:#3B6D11;--green-light:#EAF3DE;--green-dark:#27500A;
+  --pink:#993556;--pink-light:#FBEAF0;--pink-dark:#72243E;
+  --bg:#ffffff;--bg2:#f7f7f5;--bg3:#f0efe8;
+  --text:#1a1a1a;--text2:#666;--text3:#999;
+  --border:#e5e5e0;--border2:#d0d0c8;
+  --radius:10px;--radius-sm:6px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg2);color:var(--text);min-height:100vh;max-width:480px;margin:0 auto}
+.header{background:var(--purple);color:white;padding:1rem 1.25rem .75rem;position:sticky;top:0;z-index:100}
+.header-top{display:flex;align-items:center;justify-content:space-between}
+.app-title{font-size:17px;font-weight:600;letter-spacing:-.01em}
+.header-sub{font-size:12px;opacity:.75;margin-top:2px}
+.stats-row{display:flex;gap:12px;margin-top:.75rem}
+.stat{background:rgba(255,255,255,.15);border-radius:var(--radius-sm);padding:6px 10px;flex:1;text-align:center}
+.stat-val{font-size:18px;font-weight:600}
+.stat-lbl{font-size:10px;opacity:.8;margin-top:1px}
+.nav-tabs{display:flex;background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:92px;z-index:99}
+.tab{flex:1;padding:10px 4px;text-align:center;font-size:12px;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;font-weight:500}
+.tab.active{color:var(--purple);border-bottom-color:var(--purple)}
+.content{padding:1rem}
+.section{display:none}.section.active{display:block}
+.matiere-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.matiere-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;cursor:pointer;transition:all .15s}
+.matiere-card:active{transform:scale(.97)}
+.matiere-card.sel{border-color:var(--purple);border-width:2px}
+.matiere-icon{font-size:22px;margin-bottom:6px}
+.matiere-name{font-size:13px;font-weight:600;color:var(--text);line-height:1.3}
+.matiere-sub{font-size:11px;color:var(--text3);margin-top:3px}
+.progress-bar{height:3px;background:var(--border);border-radius:2px;margin:.75rem 0}
+.progress-fill{height:100%;border-radius:2px;background:var(--purple);transition:width .3s}
+.card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;margin-bottom:.75rem;font-weight:500}
+.question{font-size:16px;font-weight:500;line-height:1.5;color:var(--text);margin-bottom:1rem}
+.answer{font-size:14px;color:var(--text2);line-height:1.7;border-top:1px solid var(--border);padding-top:.75rem;display:none}
+.answer.show{display:block}
+.hint{font-size:12px;color:var(--text3);text-align:center;margin-top:.75rem}
+.btn-row{display:flex;gap:8px;margin-top:1rem}
+.btn{padding:9px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg2);font-size:13px;cursor:pointer;font-weight:500;color:var(--text);flex:1;text-align:center}
+.btn-ok{background:var(--teal-light);border-color:#9FE1CB;color:var(--teal-dark)}
+.btn-ko{background:var(--coral-light);border-color:#F5C4B3;color:var(--coral-dark)}
+.btn-purple{background:var(--purple);color:white;border-color:var(--purple)}
+.counter{font-size:13px;color:var(--text3);text-align:center;margin:.5rem 0}
+.fiche-block{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:.75rem}
+.fiche-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:.75rem}
+.notion{display:flex;gap:8px;margin-bottom:8px;font-size:13px;color:var(--text2);line-height:1.6}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--purple);margin-top:7px;flex-shrink:0}
+.quiz-q{font-size:15px;font-weight:500;color:var(--text);margin-bottom:1rem;line-height:1.5}
+.opt{width:100%;text-align:left;padding:11px 14px;margin-bottom:8px;background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:14px;cursor:pointer;color:var(--text);transition:border-color .1s}
+.opt.correct{background:var(--teal-light);border-color:#5DCAA5;color:var(--teal-dark);font-weight:500}
+.opt.wrong{background:var(--coral-light);border-color:#F0997B;color:var(--coral-dark)}
+.expl{font-size:13px;color:var(--text2);border-top:1px solid var(--border);padding-top:.75rem;margin-top:.5rem;line-height:1.6;display:none}
+.expl.show{display:block}
+.notif-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:.75rem}
+.notif-title{font-size:14px;font-weight:600;margin-bottom:.5rem}
+.notif-desc{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:1rem}
+.install-banner{background:var(--purple-light);border:1px solid #AFA9EC;border-radius:var(--radius);padding:1rem;margin-bottom:1rem;font-size:13px;color:var(--purple-dark);line-height:1.6}
+.install-title{font-weight:600;margin-bottom:.35rem;font-size:14px}
+.tag-new{background:var(--purple-light);color:var(--purple-dark);font-size:10px;padding:2px 6px;border-radius:10px;font-weight:600;margin-left:6px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="app-title">⚖ JurisMaster 80/20</div>
+      <div class="header-sub">Maîtrise le droit — notions essentielles</div>
+    </div>
+    <div style="font-size:11px;opacity:.7;text-align:right">7 matières<br>~50 flashcards</div>
+  </div>
+  <div class="stats-row">
+    <div class="stat"><div class="stat-val" id="s-seen">0</div><div class="stat-lbl">vues</div></div>
+    <div class="stat"><div class="stat-val" id="s-ok">0</div><div class="stat-lbl">maîtrisées</div></div>
+    <div class="stat"><div class="stat-val" id="s-pct">0%</div><div class="stat-lbl">score</div></div>
+    <div class="stat"><div class="stat-val" id="s-streak">0🔥</div><div class="stat-lbl">jours</div></div>
+  </div>
+</div>
+
+<div class="nav-tabs">
+  <div class="tab active" onclick="showTab('matieres',this)">Matières</div>
+  <div class="tab" onclick="showTab('flash',this)">Flashcards</div>
+  <div class="tab" onclick="showTab('fiches',this)">Fiches</div>
+  <div class="tab" onclick="showTab('quiz',this)">Quiz</div>
+  <div class="tab" onclick="showTab('notifs',this)">Notifs</div>
+</div>
+
+<div class="content">
+
+<div id="matieres" class="section active">
+  <div class="matiere-grid" id="matiere-grid"></div>
+</div>
+
+<div id="flash" class="section">
+  <div id="fc-mat-title" style="font-size:13px;color:var(--text2);margin-bottom:.5rem"></div>
+  <div class="progress-bar"><div class="progress-fill" id="fc-prog" style="width:0%"></div></div>
+  <div class="counter" id="fc-cnt">1 / 1</div>
+  <div class="card" onclick="revealAnswer()" style="cursor:pointer;min-height:200px">
+    <span class="badge" id="fc-badge"></span>
+    <div class="question" id="fc-q"></div>
+    <div class="answer" id="fc-a"></div>
+    <div class="hint" id="fc-hint">Appuie pour révéler la réponse</div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-ko" onclick="rate(false)">À revoir</button>
+    <button class="btn btn-ok" onclick="rate(true)">Maîtrisé ✓</button>
+  </div>
+  <button class="btn" style="margin-top:8px;width:100%" onclick="nextFC()">Carte suivante →</button>
+</div>
+
+<div id="fiches" class="section">
+  <div id="fiche-mat-title" style="font-size:13px;color:var(--text2);margin-bottom:.75rem"></div>
+  <div id="fiche-content"></div>
+</div>
+
+<div id="quiz" class="section">
+  <div id="q-mat-title" style="font-size:13px;color:var(--text2);margin-bottom:.5rem"></div>
+  <div class="progress-bar"><div class="progress-fill" id="q-prog" style="width:0%"></div></div>
+  <div class="counter" id="q-cnt">1 / 1</div>
+  <div class="card">
+    <div class="quiz-q" id="q-question"></div>
+    <div id="q-opts"></div>
+    <div class="expl" id="q-expl"></div>
+  </div>
+  <button class="btn btn-purple" id="q-next" style="display:none;width:100%" onclick="nextQuiz()">Question suivante →</button>
+</div>
+
+<div id="notifs" class="section">
+  <div class="install-banner">
+    <div class="install-title">📱 Installer l'app sur ton téléphone</div>
+    Sur iPhone : appuie sur le bouton Partager dans Safari → "Sur l'écran d'accueil"<br>
+    Sur Android : appuie sur les 3 points → "Ajouter à l'écran d'accueil"
+  </div>
+  <div class="notif-card">
+    <div class="notif-title">🔔 Notifications quotidiennes à 8h00</div>
+    <div class="notif-desc">Reçois une notion clé chaque matin. L'app doit être installée sur ton téléphone pour que les notifications fonctionnent.</div>
+    <button class="btn btn-purple" onclick="requestNotif()" id="notif-btn">Activer les notifications</button>
+    <div id="notif-status" style="font-size:12px;color:var(--text3);margin-top:.5rem"></div>
+  </div>
+  <div class="notif-card">
+    <div class="notif-title">🧪 Tester une notification maintenant</div>
+    <div class="notif-desc">Envoie une notification de test pour vérifier que tout fonctionne.</div>
+    <button class="btn" onclick="testNotif()">Envoyer un test</button>
+  </div>
+  <div class="notif-card">
+    <div class="notif-title">📊 Ma progression</div>
+    <div id="progress-detail" style="font-size:13px;color:var(--text2);line-height:2"></div>
+    <button class="btn btn-ko" style="margin-top:.75rem" onclick="resetStats()">Réinitialiser la progression</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+const DATA = [
+  {id:'contrats',name:'Droit des contrats',sub:'Obligations & nullités',icon:'📄',color:'#534AB7',bg:'#EEEDFE',
+   fc:[
+    {badge:'formation',q:'Quelles sont les 3 conditions de validité d\'un contrat ?',a:'Consentement non vicié, capacité des parties, contenu licite et certain (art. 1128 C.civ). L\'absence d\'une condition entraîne la nullité du contrat.'},
+    {badge:'vices',q:'Qu\'est-ce que l\'erreur vice du consentement ?',a:'Erreur sur les qualités essentielles de la prestation ou du cocontractant. Elle doit être excusable et déterminante (art. 1132). L\'erreur sur la valeur ne vicie pas le consentement.'},
+    {badge:'vices',q:'Définir le dol en droit des contrats.',a:'Manœuvres frauduleuses d\'une partie destinées à tromper l\'autre pour l\'amener à contracter (art. 1137). Le dol peut résulter d\'un mensonge, d\'une dissimulation intentionnelle, ou d\'une réticence dolosive.'},
+    {badge:'nullité',q:'Distinguer nullité relative et nullité absolue.',a:'Nullité relative : protège un intérêt privé (vices du consentement), seule la partie protégée peut agir, prescription 5 ans. Nullité absolue : protège l\'ordre public, tout intéressé peut agir.'},
+    {badge:'effets',q:'Qu\'est-ce que la force obligatoire du contrat ?',a:'Le contrat tient lieu de loi entre les parties (art. 1103). Il ne peut être modifié ou révoqué que par accord mutuel ou pour causes légales.'},
+    {badge:'imprévision',q:'Qu\'est-ce que la théorie de l\'imprévision depuis 2016 ?',a:'Art. 1195 : si un changement de circonstances imprévisible rend l\'exécution excessivement onéreuse, la partie peut demander la renégociation, puis la révision ou résolution judiciaire.'},
+    {badge:'clauses',q:'Qu\'est-ce qu\'une clause abusive ?',a:'Clause créant un déséquilibre significatif au détriment du consommateur ou non-professionnel. Réputée non écrite (art. L212-1 C.conso). Contrôle renforcé en B2C.'},
+   ],
+   fiche:[
+    {t:'Formation du contrat',n:['3 conditions : consentement + capacité + contenu licite (art. 1128)','Offre ferme + acceptation = rencontre des volontés','Obligation d\'information précontractuelle (art. 1112-1)','Contrat entre absents : formé à la réception de l\'acceptation']},
+    {t:'Vices du consentement',n:['Erreur : qualité essentielle, excusable, déterminante','Dol : manœuvres frauduleuses + réticence dolosive','Violence : contrainte physique ou morale illégitime','Lésion : seulement dans les cas prévus par la loi']},
+    {t:'Exécution & sanctions',n:['Force obligatoire : lie les parties comme la loi (art. 1103)','Inexécution → exécution forcée, résolution, D&I','Imprévision : renégociation possible depuis réforme 2016','Clause pénale : évaluée par avance, révisable par le juge']},
+   ],
+   quiz:[
+    {q:'L\'imprévision en droit des contrats (art. 1195) permet en premier lieu de :',o:['Résilier unilatéralement le contrat','Demander une renégociation amiable','Saisir immédiatement le juge','Invoquer la force majeure'],c:1,e:'Art. 1195 C.civ : la première étape est la renégociation amiable. Ce n\'est qu\'en cas d\'échec que le juge peut être saisi pour révision ou résolution.'},
+    {q:'L\'erreur sur la valeur d\'un bien :',o:['Vicie le consentement','Ne vicie pas le consentement','Est assimilée au dol','Entraîne la nullité absolue'],c:1,e:'Art. 1136 : l\'erreur sur la valeur est une erreur sur les motifs, non sur les qualités essentielles. Elle ne vicie pas le consentement, sauf si elle résulte d\'une erreur sur une qualité essentielle.'},
+    {q:'Qui peut invoquer la nullité relative ?',o:['Tout intéressé','Le juge d\'office','Uniquement la partie protégée','Le ministère public'],c:2,e:'La nullité relative protège un intérêt privé. Seule la partie que la loi entend protéger peut s\'en prévaloir (art. 1181 C.civ).'},
+   ]
+  },
+  {id:'responsabilite',name:'Responsabilité civile',sub:'Faute, préjudice, causalité',icon:'⚖️',color:'#1D9E75',bg:'#E1F5EE',
+   fc:[
+    {badge:'fondements',q:'Quels sont les 3 éléments constitutifs de la responsabilité délictuelle ?',a:'Faute (ou fait générateur), préjudice certain et direct, lien de causalité entre les deux (art. 1240 C.civ). L\'absence d\'un seul élément exclut la responsabilité.'},
+    {badge:'préjudice',q:'Quelles sont les conditions d\'un préjudice réparable ?',a:'Certain (pas éventuel), direct, personnel et légitime. La perte de chance est réparable si elle est réelle et sérieuse — on indemnise la chance perdue, pas le résultat escompté.'},
+    {badge:'fait des choses',q:'Définir la responsabilité du fait des choses.',a:'Art. 1242 : on répond du dommage causé par les choses qu\'on a sous sa garde. La garde = pouvoir d\'usage, de direction et de contrôle (pas nécessairement la propriété).'},
+    {badge:'non-cumul',q:'Qu\'est-ce que le principe de non-cumul ?',a:'Quand un contrat existe entre les parties, la victime d\'un dommage contractuel ne peut pas choisir le régime délictuel pour obtenir une meilleure indemnisation.'},
+    {badge:'exonération',q:'Quelles sont les causes d\'exonération en responsabilité ?',a:'Force majeure (extérieure, imprévisible, irrésistible), fait de la victime (exonération totale ou partielle), fait du tiers présentant les caractères de la force majeure.'},
+   ],
+   fiche:[
+    {t:'Responsabilité délictuelle',n:['3 conditions cumulatives : faute + préjudice + lien causal','Art. 1240 (ex-1382) : faute prouvée par la victime','Art. 1242 : responsabilité du fait des choses — pas de faute à prouver','Responsabilité du fait d\'autrui : parents, commettants, instituteurs']},
+    {t:'Le préjudice',n:['Corporel : atteinte à l\'intégrité physique ou psychique','Matériel : perte de revenus, dommages aux biens','Moral : souffrance, préjudice d\'affection','Perte de chance : fraction du préjudice final × probabilité de succès']},
+    {t:'Régimes spéciaux',n:['Loi Badinter 1985 : accidents de la circulation — régime de responsabilité objective','Produits défectueux : directive 85/374 transposée en droit français','SNCF, EDF : responsabilité renforcée des exploitants de services dangereux']},
+   ],
+   quiz:[
+    {q:'Le principe de non-cumul signifie :',o:['On peut choisir le régime le plus favorable','Quand un contrat existe, la resp. délictuelle est exclue','On cumule les deux indemnisations','La victime perd tous ses droits'],c:1,e:'Le principe de non-cumul interdit à la victime d\'un manquement contractuel d\'invoquer la responsabilité délictuelle. Les deux régimes sont étanches.'},
+    {q:'La perte de chance est réparable si :',o:['Le résultat final était certain','Elle est réelle et sérieuse','La faute est intentionnelle','Le préjudice est corporel'],c:1,e:'La Cour de cassation admet la réparation de la perte de chance si elle est réelle et sérieuse. On indemnise la chance perdue, et non le gain hypothétique final.'},
+   ]
+  },
+  {id:'penal',name:'Droit pénal',sub:'Infractions, peines, procédure',icon:'🔒',color:'#D85A30',bg:'#FAECE7',
+   fc:[
+    {badge:'infraction',q:'Quels sont les 3 éléments constitutifs d\'une infraction ?',a:'Légal (texte incriminateur — principe de légalité), matériel (acte ou omission), moral (intention ou imprudence). Ces 3 éléments sont cumulatifs.'},
+    {badge:'classification',q:'Distinguer crime, délit et contravention.',a:'Crimes : réclusion ≥ 10 ans, Cour d\'assises. Délits : emprisonnement < 10 ans + amende, tribunal correctionnel. Contraventions : amende jusqu\'à 3000€, tribunal de police.'},
+    {badge:'garanties',q:'Définir la présomption d\'innocence.',a:'Toute personne est présumée innocente jusqu\'à condamnation définitive. Garantie constitutionnelle (art. 9 DDHC) et conventionnelle (art. 6§2 CEDH).'},
+    {badge:'tentative',q:'À quelles conditions la tentative est-elle punissable ?',a:'Art. 121-5 : commencement d\'exécution + désistement involontaire (les circonstances, pas la volonté de l\'auteur, ont empêché la consommation). Désistement volontaire = impunité.'},
+    {badge:'complicité',q:'Définir la complicité et ses formes.',a:'Participation à l\'infraction d\'autrui par : aide ou assistance (complicité par aide), provocation ou instructions (complicité par instigation). Même peines que l\'auteur principal.'},
+    {badge:'irresponsabilité',q:'Quelles sont les causes d\'irresponsabilité pénale ?',a:'Trouble mental (art. 122-1), légitime défense (proportionnée et nécessaire), état de nécessité (mal évité > mal causé), contrainte irrésistible et imprévisible, minorité.'},
+   ],
+   fiche:[
+    {t:'L\'infraction pénale',n:['3 éléments : légal + matériel + moral — toujours cumulatifs','Principe de légalité : nul ne peut être puni sans texte (art. 111-3)','Tentative : commencement d\'exécution + désistement involontaire','Complicité : mêmes peines que l\'auteur principal']},
+    {t:'Classification tripartite',n:['Crimes → Cour d\'assises (avec jury) → réclusion criminelle','Délits → Tribunal correctionnel → emprisonnement + amende','Contraventions → Tribunal de police → amende (jusqu\'à 3000€ pour C5)','Classification détermine la prescription et la juridiction compétente']},
+    {t:'La procédure pénale',n:['Garde à vue : 24h renouvelable une fois (48h max en droit commun)','Droit au silence : garanti depuis loi 2000','Instruction : juge d\'instruction saisi pour crimes et délits complexes','Jugement → condamnation → voies de recours : appel + cassation']},
+   ],
+   quiz:[
+    {q:'Le désistement volontaire avant la consommation de l\'infraction :',o:['Aggrave la peine','Constitue une cause d\'irresponsabilité','N\'a aucun effet','Entraîne une réduction de peine'],c:1,e:'Art. 121-5 : la tentative n\'est punissable que si le désistement est involontaire. Si l\'auteur renonce librement avant la consommation, la tentative n\'est pas constituée.'},
+    {q:'La légitime défense doit être :',o:['Proportionnée et nécessaire','Proportionnée uniquement','Préventive','Décidée à l\'avance'],c:0,e:'Art. 122-5 : la légitime défense exige une riposte simultanée, nécessaire et proportionnée à l\'attaque. Une riposte disproportionnée est punissable.'},
+   ]
+  },
+  {id:'travail',name:'Droit du travail',sub:'Contrat, rupture, collectif',icon:'👔',color:'#BA7517',bg:'#FAEEDA',
+   fc:[
+    {badge:'contrat',q:'Quels sont les 3 éléments constitutifs du contrat de travail ?',a:'Prestation de travail, rémunération, lien de subordination juridique (pouvoir de donner des ordres, contrôler l\'exécution, sanctionner). Ce dernier élément est déterminant.'},
+    {badge:'rupture',q:'Distinguer faute grave et faute lourde.',a:'Faute grave : rend impossible le maintien dans l\'entreprise — pas de préavis ni indemnité de licenciement. Faute lourde : intention de nuire à l\'employeur — prive aussi de l\'indemnité compensatrice de congés payés.'},
+    {badge:'protection',q:'Définir la discrimination au travail.',a:'Traitement défavorable fondé sur un critère prohibé (origine, sexe, âge, handicap, orientation sexuelle, etc.). Art. L1132-1 C.trav : actes nuls + sanctions pénales + renversement de la charge de la preuve.'},
+    {badge:'rupture conv.',q:'Qu\'est-ce que la rupture conventionnelle ?',a:'Mode de rupture d\'un CDI par accord des parties, soumis à homologation par la Dreets. Ouvre droit aux allocations chômage. Entretien obligatoire, délai de rétractation de 15 jours.'},
+    {badge:'collectif',q:'Qu\'est-ce que le CSE et à partir de quel seuil ?',a:'Comité Social et Économique : instance unique de représentation du personnel depuis 2017 (fusion CE + DP + CHSCT). Obligatoire dès 11 salariés. Compétences renforcées à partir de 50 salariés.'},
+   ],
+   fiche:[
+    {t:'Le contrat de travail',n:['3 éléments : travail + rémunération + subordination','CDI : droit commun — CDD : liste limitative de cas (art. L1242-2)','Période d\'essai : doit être expressément prévue','Travail dissimulé : sanctions civiles et pénales lourdes']},
+    {t:'Rupture du contrat',n:['Licenciement : cause réelle et sérieuse obligatoire + procédure','Démission : acte unilatéral clair et non équivoque — pas d\'indemnités','Rupture conventionnelle : accord + homologation Dreets + 15j rétractation','Prise d\'acte : rupture aux torts de l\'employeur — requalifiée en licence. ou démission']},
+    {t:'Relations collectives',n:['CSE obligatoire dès 11 salariés (élections tous les 4 ans)','Droit de grève : suspension du contrat, pas de rupture','Accord collectif : peut déroger à la loi dans certains cas (accords de branche vs accords d\'entreprise)','Harcèlement moral/sexuel : obligation de prévention de l\'employeur']},
+   ],
+   quiz:[
+    {q:'La rupture conventionnelle homologuée :',o:['Prive le salarié des allocations chômage','Ouvre droit aux allocations chômage','N\'est possible qu\'après 2 ans d\'ancienneté','Dispense d\'entretien préalable'],c:1,e:'La rupture conventionnelle homologuée par la Dreets permet au salarié de percevoir les allocations chômage, contrairement à la démission.'},
+    {q:'La faute lourde se distingue de la faute grave par :',o:['Sa gravité objective','L\'intention de nuire à l\'employeur','L\'ancienneté du salarié','La nature du poste occupé'],c:1,e:'La faute lourde implique l\'intention de nuire à l\'employeur. Elle prive le salarié de l\'indemnité compensatrice de congés payés, en plus du préavis et de l\'indemnité de licenciement.'},
+   ]
+  },
+  {id:'admin',name:'Droit administratif',sub:'Actes, recours, responsabilité',icon:'🏛️',color:'#185FA5',bg:'#E6F1FB',
+   fc:[
+    {badge:'actes',q:'Définir l\'acte administratif unilatéral (AAU).',a:'Décision émanant d\'une autorité administrative qui s\'impose aux administrés sans leur consentement et produit des effets de droit. Soumis au contrôle du juge administratif.'},
+    {badge:'recours',q:'Quelles sont les conditions de recevabilité du REP ?',a:'Délai de 2 mois (à compter notification/publication), qualité pour agir (intérêt lésé), acte faisant grief, recours préalable si obligatoire, absence de recours parallèle.'},
+    {badge:'service public',q:'Définir le service public.',a:'Activité d\'intérêt général assurée ou contrôlée par une personne publique. Principe de continuité, d\'égalité et de mutabilité (lois de Rolland). Critère du service public = intérêt général + rattachement à une personne publique.'},
+    {badge:'responsabilité',q:'Distinguer faute de service et faute personnelle.',a:'Faute de service : engage la responsabilité de l\'administration (agent a agi dans l\'exercice de ses fonctions). Faute personnelle : faute d\'une gravité particulière ou commise en dehors du service — responsabilité personnelle de l\'agent.'},
+   ],
+   fiche:[
+    {t:'L\'acte administratif',n:['AAU : s\'impose sans consentement — régime exorbitant du droit commun','Retrait : possible dans les 4 mois pour les actes créateurs de droits','Contrat administratif : critères organiques + matériels (clauses exorbitantes ou objet de service public)','Hiérarchie des normes : l\'AAU doit respecter la loi et les règlements supérieurs']},
+    {t:'Le contentieux administratif',n:['REP : recours pour excès de pouvoir — annulation de l\'acte illégal','Plein contentieux : demande d\'indemnisation ou modification d\'une situation','Juridictions : TA → CAA → Conseil d\'État (cassation)','Délai de droit commun : 2 mois (art. R421-1 CJA)']},
+    {t:'La responsabilité de l\'État',n:['Faute de service : engage la responsabilité de l\'administration','Responsabilité sans faute : risque, rupture d\'égalité devant les charges publiques','Prescription quadriennale : 4 ans pour les créances contre l\'État','Cumul de fautes possible (faute de service + faute personnelle)']},
+   ],
+   quiz:[
+    {q:'Le délai de droit commun pour saisir le juge administratif est de :',o:['1 mois','2 mois','3 mois','6 mois'],c:1,e:'Art. R421-1 CJA : délai de 2 mois à compter de la notification ou de la publication de la décision. Passé ce délai, le recours est irrecevable.'},
+    {q:'La théorie des actes de gouvernement :',o:['Permet d\'annuler les actes politiques','Soustrait certains actes au contrôle du juge administratif','S\'applique à tous les actes du gouvernement','A été abolie par le Conseil d\'État'],c:1,e:'Certains actes (relations internationales, rapports avec le Parlement) échappent au contrôle juridictionnel car relevant de la fonction politique du gouvernement.'},
+   ]
+  },
+  {id:'constitutionnel',name:'Droit constitutionnel',sub:'Institutions, libertés, normes',icon:'📜',color:'#3B6D11',bg:'#EAF3DE',
+   fc:[
+    {badge:'hiérarchie',q:'Définir la hiérarchie des normes (Kelsen).',a:'Les normes s\'ordonnent hiérarchiquement : Constitution > traités et accords internationaux > lois > règlements > actes individuels. Chaque norme inférieure doit être conforme à la norme supérieure.'},
+    {badge:'QPC',q:'Qu\'est-ce que la QPC et depuis quand ?',a:'Question Prioritaire de Constitutionnalité : depuis la révision constitutionnelle de 2008, tout justiciable peut contester la constitutionnalité d\'une loi en vigueur. Filtrée par la Cour de cassation ou le Conseil d\'État.'},
+    {badge:'institutions',q:'Comment est composé le Conseil constitutionnel ?',a:'9 membres pour 9 ans non renouvelables : 3 nommés par le Président de la République, 3 par le Président de l\'AN, 3 par le Président du Sénat. + membres de droit : anciens Présidents de la République.'},
+    {badge:'ve République',q:'Définir le régime semi-présidentiel de la Ve République.',a:'Dualité de l\'exécutif : Président élu au suffrage universel direct + Premier ministre responsable devant l\'AN. Le Président dispose de pouvoirs propres (dissolution, art. 16, nomination du PM).'},
+   ],
+   fiche:[
+    {t:'Les sources du droit constitutionnel',n:['Bloc de constitutionnalité : Constitution 1958 + Préambule 1946 + DDHC 1789 + Charte de l\'environnement 2004','Traités : primauté sur la loi ordinaire (art. 55) mais inférieurs à la Constitution','Règlements : domaine propre de l\'exécutif (art. 37) vs domaine de la loi (art. 34)','Coutume constitutionnelle : existence discutée']},
+    {t:'Les institutions de la Ve République',n:['Président : clé de voûte des institutions, élu pour 5 ans','Gouvernement : responsable devant l\'AN (art. 49-3)','Parlement : AN (577 dép.) + Sénat (348 sén.) — bicamérisme inégalitaire','Conseil constitutionnel : gardien de la Constitution — décisions s\'imposent à tous']},
+    {t:'Les libertés fondamentales',n:['Liberté individuelle (art. 66 : le juge judiciaire, gardien)','Liberté d\'expression : fondamentale mais non absolue','Égalité : formelle + matérielle (discrimination positive débattue)','Droits sociaux : Préambule 1946 — droit au travail, à la santé, à l\'éducation']},
+   ],
+   quiz:[
+    {q:'La QPC peut être soulevée :',o:['Uniquement devant le Conseil constitutionnel','Devant toute juridiction, filtrée vers le CC','Seulement en première instance','Par le Parlement uniquement'],c:1,e:'La QPC peut être soulevée devant toute juridiction de l\'ordre judiciaire ou administratif. Elle est filtrée par la Cour de cassation ou le Conseil d\'État avant transmission éventuelle au Conseil constitutionnel.'},
+   ]
+  },
+  {id:'numerique',name:'Droit du numérique',sub:'RGPD, IA, cybersécurité',icon:'💻',color:'#993556',bg:'#FBEAF0',
+   fc:[
+    {badge:'RGPD',q:'Quels sont les grands principes du RGPD ?',a:'6 principes (art. 5) : licéité/loyauté/transparence, limitation des finalités, minimisation des données, exactitude, limitation de la conservation, intégrité et confidentialité + responsabilité (accountability).'},
+    {badge:'RGPD',q:'Quelles sont les bases légales du traitement de données personnelles ?',a:'Art. 6 RGPD : consentement, exécution d\'un contrat, obligation légale, sauvegarde des intérêts vitaux, mission d\'intérêt public, intérêts légitimes du responsable de traitement. Le consentement n\'est pas la seule base.'},
+    {badge:'RGPD',q:'Quels sont les droits des personnes concernées par un traitement ?',a:'Droit d\'accès, de rectification, d\'effacement (droit à l\'oubli), d\'opposition, à la portabilité, à la limitation du traitement, de ne pas faire l\'objet d\'une décision automatisée (art. 12-22 RGPD).'},
+    {badge:'IA Act',q:'Quelle est la logique de classification de l\'IA Act européen ?',a:'Règlement (UE) 2024/1689 : approche par niveaux de risque. Risque inacceptable (interdit) → haut risque (obligations renforcées) → risque limité (transparence) → risque minimal (libre). Les GPAI models ont des obligations spécifiques.'},
+    {badge:'IA Act',q:'Quels systèmes d\'IA sont interdits par l\'IA Act ?',a:'Systèmes de notation sociale par autorités publiques, manipulation subliminale, exploitation des vulnérabilités, identification biométrique en temps réel dans l\'espace public (sauf exceptions), catégorisation biométrique par sensibles.'},
+    {badge:'données',q:'Qu\'est-ce qu\'une donnée personnelle selon le RGPD ?',a:'Toute information relative à une personne physique identifiée ou identifiable (art. 4 RGPD). L\'identifiabilité peut être directe (nom) ou indirecte (IP, cookie, identifiant). Les données anonymisées ne sont pas soumises au RGPD.'},
+    {badge:'cybersécurité',q:'Qu\'est-ce que la directive NIS 2 ?',a:'Directive (UE) 2022/2555 : étend les obligations de cybersécurité à davantage de secteurs et d\'entités. Obligation de signalement d\'incidents, mesures de gestion des risques, responsabilité des dirigeants. Transposée en France en 2024.'},
+    {badge:'plateformes',q:'Qu\'est-ce que le DSA (Digital Services Act) ?',a:'Règlement (UE) 2022/2065 : obligations des intermédiaires en ligne selon leur taille. Les très grandes plateformes (VLOP) ont des obligations renforcées : audit, modération, transparence algorithmique, accès chercheurs.'},
+    {badge:'responsabilité',q:'Quel est le régime de responsabilité des hébergeurs ?',a:'Art. 6 LCEN (transposant directive e-commerce) : irresponsabilité de principe pour les contenus stockés, sauf connaissance du caractère illicite + absence de prompt retrait. Régime confirmé et précisé par le DSA.'},
+   ],
+   fiche:[
+    {t:'RGPD — l\'essentiel',n:['Champ d\'application : tout traitement de données de personnes dans l\'UE','6 bases légales : consentement ≠ seule base légale — bien choisir','Accountability : documenter, piloter, prouver la conformité (DPA, registre, DPIA)','Violation de données : notification CNIL dans 72h (art. 33) — notif personnes si risque élevé','Sanctions CNIL : jusqu\'à 4% du CA mondial ou 20M€ (le plus élevé)']},
+    {t:'IA Act — structure et obligations',n:['Risque inacceptable : interdit (notation sociale, manipulation, bio. en temps réel)','Haut risque : conformité avant mise sur marché (éducation, emploi, justice, infra. critique)','Modèles IA à usage général (GPAI) : obligations selon capacités et risques systémiques','Droit à l\'explication : pour les décisions automatisées à impact significatif','Autorité compétente en France : CNIL + futur Office européen de l\'IA']},
+    {t:'Cybersécurité & responsabilité numérique',n:['NIS 2 : signalement d\'incidents, mesures de sécurité, responsabilité des dirigeants','DSA : responsabilité des plateformes selon leur taille — VLOP : obligations renforcées','Données de santé : régime spécial — HDS, CNIL, finalités strictement encadrées','RGPD + IA Act : données d\'entraînement doivent être légalement collectées','E-réputation : droit à l\'oubli (CJUE, Google Spain 2014) — déréférencement']},
+   ],
+   quiz:[
+    {q:'Sous le RGPD, le consentement est :',o:['La seule base légale valide','L\'une des 6 bases légales possibles','Obligatoire pour tout traitement','Suffisant pour tout type de données'],c:1,e:'Art. 6 RGPD liste 6 bases légales alternatives. Le consentement est souvent surexploité alors que d\'autres bases (intérêt légitime, contrat) sont souvent plus adaptées et plus solides juridiquement.'},
+    {q:'L\'IA Act classe les systèmes d\'IA par :',o:['Secteur d\'activité','Niveau de risque','Pays d\'origine','Taille du modèle'],c:1,e:'L\'IA Act (Règlement 2024/1689) adopte une approche fondée sur les risques : inacceptable (interdit), haut risque, risque limité, risque minimal. La classification détermine les obligations applicables.'},
+    {q:'Le délai pour notifier une violation de données à la CNIL est de :',o:['24 heures','48 heures','72 heures','7 jours'],c:2,e:'Art. 33 RGPD : le responsable de traitement doit notifier la violation à l\'autorité de contrôle (CNIL en France) dans les 72 heures après en avoir pris connaissance, sauf si elle est peu susceptible d\'engendrer un risque.'},
+    {q:'Le droit à l\'oubli sous le RGPD permet de :',o:['Supprimer toutes les données d\'internet','Demander le déréférencement sur les moteurs de recherche','Effacer le casier judiciaire','Annuler des publications sur les réseaux sociaux'],c:1,e:'Le droit à l\'effacement (art. 17 RGPD) inclut le droit au déréférencement reconnu par la CJUE dans l\'arrêt Google Spain (2014). Il ne s\'applique que dans certaines conditions et n\'est pas absolu.'},
+   ]
+  },
+];
+
+let cur = 0, fcIdx = 0, quizIdx = 0, fcShown = false, quizDone = false;
+let stats = JSON.parse(localStorage.getItem('jm_stats')||'{"seen":0,"ok":0,"streak":0,"lastDay":""}');
+
+function saveStats(){localStorage.setItem('jm_stats',JSON.stringify(stats));}
+function updateHeader(){
+  document.getElementById('s-seen').textContent=stats.seen;
+  document.getElementById('s-ok').textContent=stats.ok;
+  document.getElementById('s-pct').textContent=stats.seen?Math.round(stats.ok/stats.seen*100)+'%':'0%';
+  document.getElementById('s-streak').textContent=stats.streak+'🔥';
+}
+function checkStreak(){
+  const today=new Date().toDateString();
+  if(stats.lastDay!==today){stats.streak=(stats.lastDay===new Date(Date.now()-86400000).toDateString()?stats.streak+1:1);stats.lastDay=today;saveStats();}
+}
+
+function showTab(id,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+  if(id==='notifs')renderProgress();
+}
+
+function renderGrid(){
+  document.getElementById('matiere-grid').innerHTML=DATA.map((m,i)=>`
+    <div class="matiere-card${i===cur?' sel':''}" onclick="selectMat(${i})" style="${i===cur?'border-color:'+m.color+';border-width:2px':''}">
+      <div class="matiere-icon">${m.icon}</div>
+      <div class="matiere-name">${m.name}</div>
+      <div class="matiere-sub">${m.sub}</div>
+      <div style="margin-top:8px;font-size:11px;color:${m.color};font-weight:600">${m.fc.length} flashcards · ${m.quiz.length} quiz</div>
+    </div>`).join('');
+}
+
+function selectMat(i){cur=i;fcIdx=0;quizIdx=0;fcShown=false;quizDone=false;renderGrid();renderFC();renderFiche();renderQuiz();}
+
+function renderFC(){
+  const m=DATA[cur],fc=m.fc[fcIdx];
+  document.getElementById('fc-mat-title').textContent=m.icon+' '+m.name;
+  document.getElementById('fc-badge').textContent=fc.badge;
+  document.getElementById('fc-badge').style.cssText=`background:${m.bg};color:${m.color}`;
+  document.getElementById('fc-q').textContent=fc.q;
+  document.getElementById('fc-a').textContent=fc.a;
+  document.getElementById('fc-a').classList.remove('show');
+  document.getElementById('fc-hint').textContent='Appuie pour révéler la réponse';
+  document.getElementById('fc-cnt').textContent=(fcIdx+1)+' / '+m.fc.length;
+  document.getElementById('fc-prog').style.width=Math.round(((fcIdx+1)/m.fc.length)*100)+'%';
+  fcShown=false;
+}
+
+function revealAnswer(){
+  if(!fcShown){document.getElementById('fc-a').classList.add('show');document.getElementById('fc-hint').textContent='Tu savais ? Note ta réponse ci-dessous';fcShown=true;}
+}
+
+function rate(ok){
+  if(!fcShown){revealAnswer();return;}
+  stats.seen++;if(ok)stats.ok++;checkStreak();saveStats();updateHeader();
+  nextFC();
+}
+
+function nextFC(){fcIdx=(fcIdx+1)%DATA[cur].fc.length;renderFC();}
+
+function renderFiche(){
+  const m=DATA[cur];
+  document.getElementById('fiche-mat-title').textContent=m.icon+' '+m.name+' — fiche 80/20';
+  document.getElementById('fiche-content').innerHTML=m.fiche.map(f=>`
+    <div class="fiche-block">
+      <div class="fiche-title" style="color:${m.color}">${f.t}</div>
+      ${f.n.map(n=>`<div class="notion"><div class="dot" style="background:${m.color}"></div><span>${n}</span></div>`).join('')}
+    </div>`).join('');
+}
+
+function renderQuiz(){
+  const m=DATA[cur],q=m.quiz[quizIdx%m.quiz.length];
+  document.getElementById('q-mat-title').textContent=m.icon+' '+m.name+' — quiz';
+  document.getElementById('q-question').textContent=q.q;
+  document.getElementById('q-opts').innerHTML=q.o.map((o,i)=>`<button class="opt" onclick="answer(${i})">${o}</button>`).join('');
+  document.getElementById('q-expl').className='expl';
+  document.getElementById('q-next').style.display='none';
+  document.getElementById('q-cnt').textContent=(quizIdx%m.quiz.length+1)+' / '+m.quiz.length;
+  document.getElementById('q-prog').style.width=Math.round(((quizIdx%m.quiz.length+1)/m.quiz.length)*100)+'%';
+  quizDone=false;
+}
+
+function answer(i){
+  if(quizDone)return;quizDone=true;
+  const m=DATA[cur],q=m.quiz[quizIdx%m.quiz.length];
+  document.querySelectorAll('.opt').forEach((b,idx)=>{if(idx===q.c)b.classList.add('correct');else if(idx===i&&i!==q.c)b.classList.add('wrong');});
+  stats.seen++;if(i===q.c)stats.ok++;checkStreak();saveStats();updateHeader();
+  const expl=document.getElementById('q-expl');expl.textContent=q.e;expl.classList.add('show');
+  document.getElementById('q-next').style.display='block';
+}
+
+function nextQuiz(){quizIdx++;renderQuiz();}
+
+function renderProgress(){
+  document.getElementById('progress-detail').innerHTML=`
+    Cartes vues : <strong>${stats.seen}</strong><br>
+    Maîtrisées : <strong>${stats.ok}</strong><br>
+    Taux de réussite : <strong>${stats.seen?Math.round(stats.ok/stats.seen*100):0}%</strong><br>
+    Série en cours : <strong>${stats.streak} jour(s) 🔥</strong>`;
+}
+
+function resetStats(){if(confirm('Réinitialiser toute la progression ?')){stats={seen:0,ok:0,streak:0,lastDay:''};saveStats();updateHeader();renderProgress();}}
+
+async function requestNotif(){
+  const btn=document.getElementById('notif-btn');
+  const status=document.getElementById('notif-status');
+  if(!('Notification' in window)){status.textContent='Les notifications ne sont pas supportées par ce navigateur.';return;}
+  const perm=await Notification.requestPermission();
+  if(perm==='granted'){
+    status.textContent='✓ Notifications activées ! Tu recevras une notion chaque matin à 8h00.';
+    btn.textContent='Notifications activées ✓';
+    btn.style.background='var(--teal)';
+    scheduleDaily();
+  } else {
+    status.textContent='Notifications refusées. Active-les dans les paramètres de ton navigateur.';
+  }
+}
+
+function getRandomNotion(){
+  const m=DATA[Math.floor(Math.random()*DATA.length)];
+  const fc=m.fc[Math.floor(Math.random()*m.fc.length)];
+  return {title:'⚖ JurisMaster — Notion du jour',body:fc.q};
+}
+
+function scheduleDaily(){
+  const now=new Date();
+  const next=new Date();
+  next.setHours(8,0,0,0);
+  if(next<=now)next.setDate(next.getDate()+1);
+  const delay=next-now;
+  setTimeout(()=>{
+    sendNotif();
+    setInterval(sendNotif,24*60*60*1000);
+  },delay);
+}
+
+function sendNotif(){
+  if(Notification.permission!=='granted')return;
+  const n=getRandomNotion();
+  if('serviceWorker' in navigator&&navigator.serviceWorker.controller){
+    navigator.serviceWorker.controller.postMessage({type:'SHOW_NOTIF',title:n.title,body:n.body});
+  } else {
+    new Notification(n.title,{body:n.body,icon:'/manifest.json'});
+  }
+}
+
+function testNotif(){
+  if(Notification.permission!=='granted'){alert('Active d\'abord les notifications dans l\'onglet Notifs !');return;}
+  const n=getRandomNotion();
+  if('serviceWorker' in navigator&&navigator.serviceWorker.controller){
+    navigator.serviceWorker.controller.postMessage({type:'SHOW_NOTIF',title:n.title,body:n.body});
+  } else {
+    new Notification(n.title,{body:n.body});
+  }
+}
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/sw.js').then(()=>{
+    if(localStorage.getItem('jm_notif')==='on')scheduleDaily();
+  }).catch(()=>{});
+}
+
+checkStreak();updateHeader();renderGrid();renderFC();renderFiche();renderQuiz();
+</script>
+</body>
+</html>
