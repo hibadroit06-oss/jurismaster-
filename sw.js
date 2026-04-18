@@ -1,5 +1,5 @@
 const CACHE = 'jurismaster-v2';
-const BASE = '/jurismaster';
+const BASE = '/jurismaster-';
 const ASSETS = [BASE + '/', BASE + '/index.html', BASE + '/manifest.json'];
 
 self.addEventListener('install', e => {
