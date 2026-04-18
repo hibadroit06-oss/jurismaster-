@@ -2,7 +2,7 @@
   "name": "JurisMaster 80/20",
   "short_name": "JurisMaster",
   "description": "Maîtrise le droit français avec la règle 80/20",
-  "start_url": "/jurismaster/",
+  "start_url": "/jurismaster-/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#534AB7",
